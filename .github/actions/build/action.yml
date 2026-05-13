@@ -12,6 +12,10 @@ inputs:
     description: "Artifact file name"
     required: false
     default: ''
+  git-tag:
+    description: "Git tag for release metadata"
+    required: false
+    default: ''
 
 runs:
   using: "composite"
@@ -27,7 +31,7 @@ runs:
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Platform=x86 /p:Configuration=${{inputs.build-config}} /p:GitCommit=${{github.sha}} /p:GitBranch=${{github.ref}} /v:q ${{inputs.sln-path}}
+      run: msbuild /m /p:Platform=x86 /p:Configuration=${{inputs.build-config}} /p:GitCommit=${{github.sha}} /p:GitBranch=${{github.ref}} /p:GitTag=${{inputs.git-tag}} /v:q ${{inputs.sln-path}}
       shell: cmd
 
     - name: Upload artifact

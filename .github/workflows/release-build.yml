@@ -25,6 +25,7 @@ jobs:
         uses: ./.github/actions/build
         with:
           build-config: ${{ env.BUILD_CONFIG }}
+          git-tag: ${{ github.ref_name }}
 
       - name: Create an Archive for the Release
         run: >

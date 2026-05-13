@@ -44,5 +44,8 @@ BEGIN
 #ifdef STR_GIT_BRANCH
   VALUE "GitBranch", STR_GIT_BRANCH
 #endif
+#ifdef STR_GIT_TAG
+  VALUE "GitTag", STR_GIT_TAG
+#endif
  END
 END

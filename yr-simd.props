@@ -87,20 +87,35 @@
       <PreprocessorDefinitions>DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(GitCommit)' != ''">
+  <PropertyGroup>
+    <TagVersionMajor></TagVersionMajor>
+    <TagVersionMinor></TagVersionMinor>
+    <TagVersionRevision></TagVersionRevision>
+    <TagVersionPatch></TagVersionPatch>
+
+    <TagVersionMajor Condition="'$(GitTag)' != '' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(GitTag)', '^v\d+\.\d+\.\d+\.\d+$'))">$([System.Text.RegularExpressions.Regex]::Replace('$(GitTag)', '^v(\d+)\.(\d+)\.(\d+)\.(\d+)$', '$1'))</TagVersionMajor>
+    <TagVersionMinor Condition="'$(GitTag)' != '' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(GitTag)', '^v\d+\.\d+\.\d+\.\d+$'))">$([System.Text.RegularExpressions.Regex]::Replace('$(GitTag)', '^v(\d+)\.(\d+)\.(\d+)\.(\d+)$', '$2'))</TagVersionMinor>
+    <TagVersionRevision Condition="'$(GitTag)' != '' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(GitTag)', '^v\d+\.\d+\.\d+\.\d+$'))">$([System.Text.RegularExpressions.Regex]::Replace('$(GitTag)', '^v(\d+)\.(\d+)\.(\d+)\.(\d+)$', '$3'))</TagVersionRevision>
+    <TagVersionPatch Condition="'$(GitTag)' != '' and $([System.Text.RegularExpressions.Regex]::IsMatch('$(GitTag)', '^v\d+\.\d+\.\d+\.\d+$'))">$([System.Text.RegularExpressions.Regex]::Replace('$(GitTag)', '^v(\d+)\.(\d+)\.(\d+)\.(\d+)$', '$4'))</TagVersionPatch>
+
+    <BuildMetadataDefines></BuildMetadataDefines>
+    <BuildMetadataDefines Condition="'$(GitCommit)' != ''">$(BuildMetadataDefines) /DGIT_COMMIT="$(GitCommit)"</BuildMetadataDefines>
+    <BuildMetadataDefines Condition="'$(GitBranch)' != ''">$(BuildMetadataDefines) /DGIT_BRANCH="$(GitBranch)"</BuildMetadataDefines>
+    <BuildMetadataDefines Condition="'$(GitTag)' != ''">$(BuildMetadataDefines) /DGIT_TAG="$(GitTag)"</BuildMetadataDefines>
+    <BuildMetadataDefines Condition="'$(TagVersionMajor)' != ''">$(BuildMetadataDefines) /DVERSION_MAJOR=$(TagVersionMajor)</BuildMetadataDefines>
+    <BuildMetadataDefines Condition="'$(TagVersionMinor)' != ''">$(BuildMetadataDefines) /DVERSION_MINOR=$(TagVersionMinor)</BuildMetadataDefines>
+    <BuildMetadataDefines Condition="'$(TagVersionRevision)' != ''">$(BuildMetadataDefines) /DVERSION_REVISION=$(TagVersionRevision)</BuildMetadataDefines>
+    <BuildMetadataDefines Condition="'$(TagVersionPatch)' != ''">$(BuildMetadataDefines) /DVERSION_PATCH=$(TagVersionPatch)</BuildMetadataDefines>
+  </PropertyGroup>
+  <Target Name="ValidateGitTagFormat" BeforeTargets="PrepareForBuild" Condition="'$(GitTag)' != ''">
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(GitTag)', '^v\d+\.\d+\.\d+\.\d+$'))" Text="GitTag '$(GitTag)' must match vMAJOR.MINOR.REVISION.PATCH." />
+  </Target>
+  <ItemDefinitionGroup Condition="'$(BuildMetadataDefines)' != ''">
     <ClCompile>
-      <AdditionalOptions>/DGIT_COMMIT="$(GitCommit)" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>$(BuildMetadataDefines) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
-      <AdditionalOptions>/DGIT_COMMIT="$(GitCommit)" %(AdditionalOptions)</AdditionalOptions>
-    </ResourceCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(GitBranch)' != ''">
-    <ClCompile>
-      <AdditionalOptions>/DGIT_BRANCH="$(GitBranch)" %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ResourceCompile>
-      <AdditionalOptions>/DGIT_BRANCH="$(GitBranch)" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>$(BuildMetadataDefines) %(AdditionalOptions)</AdditionalOptions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
