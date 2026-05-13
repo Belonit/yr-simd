@@ -1,0 +1,3 @@
+[submodule "YRpp"]
+	path = YRpp
+	url = git@github.com:Phobos-developers/YRpp.git

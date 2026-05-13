@@ -1,0 +1,41 @@
+name: "Release Build"
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      BUILD_CONFIG: Release
+      ARCHIVE_NAME: yr-simd-${{ github.ref_name }}.zip
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.yr-simd_CI_SSH_PRIVATEKEY }}
+
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          build-config: ${{ env.BUILD_CONFIG }}
+
+      - name: Create an Archive for the Release
+        run: >
+          7z a ${{ env.ARCHIVE_NAME }}
+          ./LICENSE.md
+          ./README.md
+          ./${{ env.BUILD_CONFIG }}/yr-simd.dll
+          ${{!contains(env.BUILD_CONFIG, 'Hardened') && format('./{0}/yr-simd.pdb', env.BUILD_CONFIG) || ''}}
+
+      - name: Upload Files to the Release
+        uses: softprops/action-gh-release@v2
+        with:
+          append_body: true
+          files: ${{ env.ARCHIVE_NAME }}

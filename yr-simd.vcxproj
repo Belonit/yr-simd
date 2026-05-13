@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectName>yr-simd</ProjectName>
+    <RootNamespace>yr-simd</RootNamespace>
+    <ProjectGuid>{2102B3E1-5FCB-4126-BF7D-4FB4E652697F}</ProjectGuid>
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ShowAllFiles>true</ShowAllFiles>
+    <ThisDir>$(MSBuildThisFileDirectory)</ThisDir>
+    <YRppDir>$(ThisDir)YRpp</YRppDir>
+  </PropertyGroup>
+  <!-- Import props -->
+  <Import Project="$(ThisDir)\yr-simd.props" />
+  <Import Project="$(YRppDir)\YRpp.props" />
+  <!-- Compiled files -->
+  <ItemGroup>
+    <!-- Root -->
+    <ResourceCompile Include="$(ThisDir)\src\version.rc" />
+    <ClCompile Include="$(ThisDir)\src\Main.Config.cpp" />
+    <ClCompile Include="$(ThisDir)\src\Main.cpp" />
+    <ClCompile Include="$(ThisDir)\src\Main.DetachFromDebugger.cpp" />
+    <ClCompile Include="$(ThisDir)\src\Main.Hook.cpp" />
+    <!-- Utilities -->
+    <ClCompile Include="$(ThisDir)\src\Utilities\Debug.cpp" />
+    <ClCompile Include="$(ThisDir)\src\Utilities\Patch.cpp" />
+    <ClCompile Include="$(ThisDir)\src\Utilities\Simd.cpp" />
+    <!-- Ext -->
+    <!-- Ext/ConvertClass -->
+    <ClCompile Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.byte.avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <PreprocessorDefinitions>YR_SIMD_COMPILE_AVX2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/arch:AVX2 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.byte.avx512.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <PreprocessorDefinitions>YR_SIMD_COMPILE_AVX512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/arch:AVX512 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.word.avx2.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <PreprocessorDefinitions>YR_SIMD_COMPILE_AVX2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/arch:AVX2 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.word.avx512.cpp">
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <PreprocessorDefinitions>YR_SIMD_COMPILE_AVX512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/arch:AVX512 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="$(ThisDir)\src\Ext\ConvertClass\Body.cpp" />
+  </ItemGroup>
+  <!-- Header files -->
+  <ItemGroup>
+    <!-- Root -->
+    <ClInclude Include="$(ThisDir)\src\version.h" />
+    <ClInclude Include="$(ThisDir)\src\Main.h" />
+    <ClInclude Include="$(ThisDir)\src\Main.Config.h" />
+    <!-- Utilities -->
+    <ClInclude Include="$(ThisDir)\src\Utilities\Debug.h" />
+    <ClInclude Include="$(ThisDir)\src\Utilities\Macro.h" />
+    <ClInclude Include="$(ThisDir)\src\Utilities\Patch.h" />
+    <ClInclude Include="$(ThisDir)\src\Utilities\Simd.h" />
+    <!-- Ext -->
+    <!-- Ext/ConvertClass -->
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.levels.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.byte.sse2.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.byte.avx2.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.byte.avx512.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.byte.scalar.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.word.sse2.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.word.avx2.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.word.avx512.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\BlitterPack\BlitterPack.word.scalar.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\Body.h" />
+    <ClInclude Include="$(ThisDir)\src\Ext\ConvertClass\Blitters\index.h" />
+  </ItemGroup>
+</Project>
