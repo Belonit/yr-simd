@@ -82,26 +82,26 @@ public:
 	RLEBlitTransLucent25ZReadWrite<WORD, Simd::Level::AVX2> RleBlitterTransLucent25ZReadWrite;
 	RLEBlitTransXlatAlpha<WORD, Simd::Level::Scalar> RleBlitterTransXlatAlpha;
 	RLEBlitTransZRemapXlatAlpha<WORD, Simd::Level::SSE2> RleBlitterTransZRemapXlatAlpha;
-	RLEBlitTransLucent75Alpha<WORD, Simd::Level::AVX2> RleBlitterTransLucent75Alpha;
-	RLEBlitTransLucent50Alpha<WORD, Simd::Level::AVX2> RleBlitterTransLucent50Alpha;
-	RLEBlitTransLucent25Alpha<WORD, Simd::Level::AVX2> RleBlitterTransLucent25Alpha;
+	RLEBlitTransLucent75Alpha<WORD, Simd::Level::SSE2> RleBlitterTransLucent75Alpha;
+	RLEBlitTransLucent50Alpha<WORD, Simd::Level::SSE2> RleBlitterTransLucent50Alpha;
+	RLEBlitTransLucent25Alpha<WORD, Simd::Level::SSE2> RleBlitterTransLucent25Alpha;
 	RLEBlitTransXlatAlphaZRead<WORD, Simd::Level::AVX2> RleBlitterTransXlatAlphaZRead;
 	RLEBlitTransZRemapXlatAlphaZRead<WORD, Simd::Level::SSE2> RleBlitterTransZRemapXlatAlphaZRead;
-	RLEBlitTransLucent75AlphaZRead<WORD, Simd::Level::AVX2> RleBlitterTransLucent75AlphaZRead;
-	RLEBlitTransLucent50AlphaZRead<WORD, Simd::Level::AVX2> RleBlitterTransLucent50AlphaZRead;
-	RLEBlitTransLucent25AlphaZRead<WORD, Simd::Level::AVX2> RleBlitterTransLucent25AlphaZRead;
-	RLEBlitTransLucent75AlphaZReadWarp<WORD, Simd::Level::AVX2> RleBlitterTransLucent75AlphaZReadWarp;
-	RLEBlitTransLucent50AlphaZReadWarp<WORD, Simd::Level::AVX2> RleBlitterTransLucent50AlphaZReadWarp;
-	RLEBlitTransLucent25AlphaZReadWarp<WORD, Simd::Level::AVX2> RleBlitterTransLucent25AlphaZReadWarp;
+	RLEBlitTransLucent75AlphaZRead<WORD, Simd::Level::SSE2> RleBlitterTransLucent75AlphaZRead;
+	RLEBlitTransLucent50AlphaZRead<WORD, Simd::Level::SSE2> RleBlitterTransLucent50AlphaZRead;
+	RLEBlitTransLucent25AlphaZRead<WORD, Simd::Level::SSE2> RleBlitterTransLucent25AlphaZRead;
+	RLEBlitTransLucent75AlphaZReadWarp<WORD, Simd::Level::SSE2> RleBlitterTransLucent75AlphaZReadWarp;
+	RLEBlitTransLucent50AlphaZReadWarp<WORD, Simd::Level::SSE2> RleBlitterTransLucent50AlphaZReadWarp;
+	RLEBlitTransLucent25AlphaZReadWarp<WORD, Simd::Level::SSE2> RleBlitterTransLucent25AlphaZReadWarp;
 	RLEBlitTransXlatAlphaZReadWrite<WORD, Simd::Level::AVX2> RleBlitterTransXlatAlphaZReadWrite;
 	RLEBlitTransZRemapXlatAlphaZReadWrite<WORD, Simd::Level::SSE2> RleBlitterTransZRemapXlatAlphaZReadWrite;
-	RLEBlitTransLucent75AlphaZReadWrite<WORD, Simd::Level::AVX2> RleBlitterTransLucent75AlphaZReadWrite;
-	RLEBlitTransLucent50AlphaZReadWrite<WORD, Simd::Level::AVX2> RleBlitterTransLucent50AlphaZReadWrite;
-	RLEBlitTransLucent25AlphaZReadWrite<WORD, Simd::Level::AVX2> RleBlitterTransLucent25AlphaZReadWrite;
+	RLEBlitTransLucent75AlphaZReadWrite<WORD, Simd::Level::SSE2> RleBlitterTransLucent75AlphaZReadWrite;
+	RLEBlitTransLucent50AlphaZReadWrite<WORD, Simd::Level::SSE2> RleBlitterTransLucent50AlphaZReadWrite;
+	RLEBlitTransLucent25AlphaZReadWrite<WORD, Simd::Level::SSE2> RleBlitterTransLucent25AlphaZReadWrite;
 
-	RLEBlitTransLucent75AlphaZReadFix<WORD, Simd::Level::AVX2> RleBlitterTransLucent75AlphaZReadFix;
-	RLEBlitTransLucent50AlphaZReadFix<WORD, Simd::Level::AVX2> RleBlitterTransLucent50AlphaZReadFix;
-	RLEBlitTransLucent25AlphaZReadFix<WORD, Simd::Level::AVX2> RleBlitterTransLucent25AlphaZReadFix;
+	RLEBlitTransLucent75AlphaZReadFix<WORD, Simd::Level::SSE2> RleBlitterTransLucent75AlphaZReadFix;
+	RLEBlitTransLucent50AlphaZReadFix<WORD, Simd::Level::SSE2> RleBlitterTransLucent50AlphaZReadFix;
+	RLEBlitTransLucent25AlphaZReadFix<WORD, Simd::Level::SSE2> RleBlitterTransLucent25AlphaZReadFix;
 
 public:
 	BlitterPack16AVX2(WORD* paletteData, WORD* fullColorData, BYTE** currentZRemap, WORD halfTranslucencyMask, WORD quatTranslucencyMask, int shadeCount);

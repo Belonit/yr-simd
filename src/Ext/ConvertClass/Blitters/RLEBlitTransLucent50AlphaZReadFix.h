@@ -174,7 +174,7 @@ private:
 		}
 
 		// SSE2
-		if constexpr (Level == Simd::Level::SSE2 || Level == Simd::Level::AVX2)
+		if constexpr (Level == Simd::Level::SSE2)
 		{
 			const bool canUseVectorZ = zbase >= 127 && zbase <= 65407;
 			if (canUseVectorZ)

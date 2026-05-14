@@ -177,7 +177,8 @@ private:
 								*pDest = pPaletteData[pRemapData[*pRunSrc]];
 							else
 								*pDest = pPaletteData[(*pRemapData)[*pRunSrc]];
-								*zbuf = static_cast<WORD>(zval);
+
+							*zbuf = static_cast<WORD>(zval);
 						}
 
 						++pRunSrc;
@@ -267,7 +268,7 @@ private:
 						if (zval < *zbuf)
 						{
 							pDest[0] = pRemapDest[pDest[0]];
-								*zbuf = static_cast<WORD>(zval);
+							*zbuf = static_cast<WORD>(zval);
 						}
 
 						++pRunSrc;

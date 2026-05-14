@@ -186,7 +186,6 @@ private:
 			}
 		}
 
-
 		// Scalar
 		while (len--)
 		{

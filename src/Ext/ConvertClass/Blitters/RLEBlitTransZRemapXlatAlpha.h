@@ -179,7 +179,7 @@ private:
 
 						const __m256i remapIndex32 = _mm256_load_si256(reinterpret_cast<const __m256i*>(remapIndices));
 						const __m256i alphaIndex32 = Avx2_Load8WordAsEpi32(abuf);
-						const __m256i alphaValue32 = Avx2_GatherWordTable(alphaIndex32, pAData, 0x00FF);
+						const __m256i alphaValue32 = Avx2_GatherWordTable256(alphaIndex32, pAData);
 						const __m256i paletteIndex32 = _mm256_or_si256(remapIndex32, alphaValue32);
 						const __m256i result32 = Avx2_GatherWordTable(paletteIndex32, pPaletteData, 0xFFFF);
 						const __m128i result16 = Avx2_PackU32ToU16(result32);

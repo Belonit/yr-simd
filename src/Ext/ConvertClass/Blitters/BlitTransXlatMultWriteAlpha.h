@@ -6,9 +6,7 @@ DEFINE_BLITTER(BlitTransXlatMultWriteAlpha, BlitterPixelWordOnly)
 {
 public:
 	inline explicit BlitTransXlatMultWriteAlpha() noexcept
-	{
-
-	}
+	{ }
 
 	virtual ~BlitTransXlatMultWriteAlpha() override final = default;
 
@@ -122,7 +120,6 @@ private:
 				ADJUST_POINTER(pABuffer, abuf);
 			}
 		}
-
 
 		// Scalar
 		while (len--)
