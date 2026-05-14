@@ -231,6 +231,16 @@ inline constexpr bool CompileAvx2 = false;
 		return value32;                                                                                        \
 	}((index32), (pTable), (maxIndex)))
 
+#define Avx2_GatherWordTable256(index32, pTable)                                                               \
+	([](const __m256i index32Local, const WORD* pTableLocal) -> __m256i                                        \
+	{                                                                                                          \
+		const __m256i maxIndex32 = _mm256_set1_epi32(0xFF);                                                    \
+		const __m256i clampedIndex32 = _mm256_min_epu32(index32Local, maxIndex32);                             \
+		__m256i value32 = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pTableLocal), clampedIndex32, 2);\
+		value32 = _mm256_and_si256(value32, _mm256_set1_epi32(0xFFFF));                                        \
+		return value32;                                                                                        \
+	}((index32), (pTable)))
+
 #define Avx2_GatherPaletteWord(srcIndex32, pPaletteData) \
 	Avx2_GatherWordTable((srcIndex32), (pPaletteData), 0xFF)
 

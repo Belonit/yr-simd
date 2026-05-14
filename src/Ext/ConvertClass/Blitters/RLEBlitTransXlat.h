@@ -230,7 +230,6 @@ private:
 			return;
 		}
 
-
 		// Scalar
 		auto handler = [pPaletteData](T& dest, byte srcv)
 		{

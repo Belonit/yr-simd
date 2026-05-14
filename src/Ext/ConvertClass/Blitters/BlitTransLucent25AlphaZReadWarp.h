@@ -193,7 +193,7 @@ private:
 					if (_mm256_movemask_epi8(activeMask32))
 					{
 						const __m256i alphaIndex32 = Avx2_Load8WordAsEpi32(abuf);
-						const __m256i alphaValue32 = Avx2_GatherWordTable(alphaIndex32, pAData, 0x00FF);
+						const __m256i alphaValue32 = Avx2_GatherWordTable256(alphaIndex32, pAData);
 						const __m256i paletteIndex32 = _mm256_or_si256(srcIndex32, alphaValue32);
 						const __m256i srcColor32 = Avx2_GatherWordTable(paletteIndex32, pPaletteData, 0xFFFF);
 						const __m256i bg32 = Avx2_Load8WordAsEpi32(pWarpDest);

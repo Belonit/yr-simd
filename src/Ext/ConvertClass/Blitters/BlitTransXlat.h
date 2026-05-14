@@ -110,7 +110,6 @@ private:
 			}
 		}
 
-
 		// Scalar
 		while (len--)
 		{
