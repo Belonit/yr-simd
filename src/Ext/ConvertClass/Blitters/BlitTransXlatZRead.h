@@ -41,72 +41,6 @@ private:
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
 		WORD* pPaletteData = this->PaletteData;
 
-		// AVX512
-		if constexpr (Level == Simd::Level::AVX512 && CompileAvx512)
-		{
-			constexpr int ChunkSize = 16;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
-			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
-
-			const __m128i zero = _mm_setzero_si128();
-			const __m512i low16Mask = _mm512_set1_epi32(0xFFFF);
-			const __m256i zvalVec = _mm256_set1_epi16(static_cast<short>(zval));
-
-			while (len >= ChunkSize)
-			{
-				const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-				if (zAddress + ChunkBytes > zTailAddress)
-				{
-					break;
-				}
-
-				const __m128i srcBytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src));
-				const __mmask16 srcMask = _mm_cmpneq_epu8_mask(srcBytes, zero);
-
-				__mmask16 zMask = 0;
-				if (zval < 0)
-				{
-					zMask = static_cast<__mmask16>(0xFFFF);
-				}
-				else if (zval <= 0xFFFF)
-				{
-					zMask = _mm256_cmpgt_epu16_mask(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(zbuf)), zvalVec);
-				}
-
-				const __mmask16 activeMask = srcMask & zMask;
-				if (activeMask)
-				{
-					const __m512i srcIndices = _mm512_cvtepu8_epi32(srcBytes);
-					const __mmask16 maxIndexMask = _mm_cmpeq_epu8_mask(srcBytes, _mm_set1_epi8(static_cast<char>(0xFF)));
-					const __mmask16 gatherMask = activeMask & ~maxIndexMask;
-
-					__m512i srcColors = _mm512_setzero_si512();
-					if (gatherMask)
-					{
-						srcColors = _mm512_mask_i32gather_epi32(srcColors, gatherMask, srcIndices, pPaletteData, 2);
-					}
-
-					srcColors = _mm512_and_si512(srcColors, low16Mask);
-
-					const __mmask16 fillMask = activeMask & maxIndexMask;
-					if (fillMask)
-					{
-						srcColors = _mm512_mask_set1_epi32(srcColors, fillMask, static_cast<int>(pPaletteData[255]));
-					}
-
-					const __m256i result16 = _mm512_cvtusepi32_epi16(srcColors);
-					_mm256_mask_storeu_epi16(pDest, activeMask, result16);
-				}
-
-				src += ChunkSize;
-				pDest += ChunkSize;
-				zbuf += ChunkSize;
-				len -= ChunkSize;
-				ADJUST_POINTER(pZBuffer, zbuf);
-			}
-		}
-
 		// AVX2
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
@@ -147,63 +81,6 @@ private:
 					const __m128i oldValue16 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pDest));
 					const __m128i blended16 = Avx2_BlendU16(oldValue16, result16, writeMask16);
 
-					_mm_storeu_si128(reinterpret_cast<__m128i*>(pDest), blended16);
-				}
-
-				src += ChunkSize;
-				pDest += ChunkSize;
-				zbuf += ChunkSize;
-				len -= ChunkSize;
-				ADJUST_POINTER(pZBuffer, zbuf);
-			}
-		}
-
-		// SSE2
-		if constexpr (Level == Simd::Level::SSE2)
-		{
-			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
-			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
-
-			const __m128i zero16 = _mm_setzero_si128();
-
-			__m128i zMask16 = _mm_setzero_si128();
-			if (zval < 0)
-			{
-				zMask16 = _mm_set1_epi16(static_cast<short>(-1));
-			}
-			else if (zval <= 0xFFFF)
-			{
-				zMask16 = _mm_set1_epi16(static_cast<short>(zval));
-			}
-
-			while (len >= ChunkSize)
-			{
-				const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-				if (zAddress + ChunkBytes > zTailAddress)
-					break;
-
-				const __m128i srcIndex16 = Sse2_Expand8ToEpi16(src);
-				const __m128i srcMask16 = _mm_cmpgt_epi16(srcIndex16, zero16);
-
-				__m128i activeMask16 = _mm_setzero_si128();
-				if (zval < 0)
-				{
-					activeMask16 = srcMask16;
-				}
-				else if (zval <= 0xFFFF)
-				{
-					const __m128i zbuf16 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(zbuf));
-					const __m128i zCmpMask16 = Sse2_CmpGtEpu16(zbuf16, zMask16);
-					activeMask16 = _mm_and_si128(srcMask16, zCmpMask16);
-				}
-
-				if (_mm_movemask_epi8(activeMask16))
-				{
-					const __m128i srcColor16 = Sse2_GatherPaletteWord(srcIndex16, pPaletteData);
-					const __m128i oldValue16 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pDest));
-					const __m128i blended16 = Sse2_BlendU16(oldValue16, srcColor16, activeMask16);
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(pDest), blended16);
 				}
 

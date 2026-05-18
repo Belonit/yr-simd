@@ -117,7 +117,7 @@ concept BlitterPixelWordOnly = std::same_as<T, WORD>;
 template<typename T>
 concept BlitterPixelByteOnly = std::same_as<T, BYTE>;
 
-#define DEFINE_BLITTER(x, PixelConstraint) \
+#define DEFINE_BLITTER(x, PixelConstraint)     \
 template<PixelConstraint T, Simd::Level Level> \
 class x final : public Blitter
 
@@ -126,7 +126,7 @@ template<PixelConstraint T, Simd::Level Level> \
 class x final : public RLEBlitter
 
 #define DEFINE_RLE_BLITTER_INHERITABLE(x, PixelConstraint) \
-template<PixelConstraint T, Simd::Level Level> \
+template<PixelConstraint T, Simd::Level Level>             \
 class x : public RLEBlitter
 
 #if defined(YR_SIMD_COMPILE_AVX512)
@@ -135,14 +135,14 @@ inline constexpr bool CompileAvx512 = true;
 inline constexpr bool CompileAvx512 = false;
 #endif
 
-#if defined(YR_SIMD_COMPILE_AVX2)
+#if defined(YR_SIMD_COMPILE_AVX2) || defined(YR_SIMD_COMPILE_AVX512)
 inline constexpr bool CompileAvx2 = true;
 #else
 inline constexpr bool CompileAvx2 = false;
 #endif
 
 #if defined(YR_SIMD_COMPILE_AVX512)
-#define Avx512_Expand16ToEpi32(pSrc) \
+#define Avx512_Expand16ToEpi32(pSrc)                                              \
 	_mm512_cvtepu8_epi32(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pSrc)))
 
 #define Avx512_PackU32ToU8(value32) \
@@ -157,17 +157,6 @@ inline constexpr bool CompileAvx2 = false;
 
 #define Sse2_Expand8ToEpi16(pSrc) \
 	_mm_unpacklo_epi8(_mm_loadl_epi64(reinterpret_cast<const __m128i*>(pSrc)), _mm_setzero_si128())
-
-#define Sse2_GatherPaletteWord(srcIndex16, pPaletteData)                          \
-	([](const __m128i srcIndex16Local, const WORD* pPaletteDataLocal) -> __m128i  \
-	{                                                                             \
-		alignas(16) WORD indexArray[8];                                           \
-		_mm_store_si128(reinterpret_cast<__m128i*>(indexArray), srcIndex16Local); \
-		alignas(16) WORD valueArray[8];                                           \
-		for (int i = 0; i < 8; ++i)                                               \
-			valueArray[i] = pPaletteDataLocal[indexArray[i]];                     \
-		return _mm_load_si128(reinterpret_cast<const __m128i*>(valueArray));      \
-	}((srcIndex16), (pPaletteData)))
 
 #define Sse2_BlendU16(oldValue16, newValue16, writeMask16) \
 	_mm_or_si128(_mm_and_si128((writeMask16), (newValue16)), _mm_andnot_si128((writeMask16), (oldValue16)))

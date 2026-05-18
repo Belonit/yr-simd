@@ -41,41 +41,6 @@ private:
 		T* pDest = reinterpret_cast<T*>(dst);
 		T* pPaletteData = this->PaletteData;
 
-		// AVX512
-		if constexpr (Level == Simd::Level::AVX512 && std::is_same_v<T, WORD> && CompileAvx512)
-		{
-			constexpr int ChunkSize = 16;
-			const __m512i low16Mask = _mm512_set1_epi32(0xFFFF);
-
-			while (len >= ChunkSize)
-			{
-				const __m128i srcBytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src));
-				const __m512i srcIndices = _mm512_cvtepu8_epi32(srcBytes);
-				const __mmask16 maxIndexMask = _mm_cmpeq_epu8_mask(srcBytes, _mm_set1_epi8(static_cast<char>(0xFF)));
-				const __mmask16 gatherMask = static_cast<__mmask16>(~maxIndexMask);
-
-				__m512i srcColors = _mm512_setzero_si512();
-				if (gatherMask)
-				{
-					srcColors = _mm512_mask_i32gather_epi32(srcColors, gatherMask, srcIndices, pPaletteData, 2);
-				}
-
-				srcColors = _mm512_and_si512(srcColors, low16Mask);
-
-				if (maxIndexMask)
-				{
-					srcColors = _mm512_mask_set1_epi32(srcColors, maxIndexMask, static_cast<int>(pPaletteData[255]));
-				}
-
-				const __m256i result16 = _mm512_cvtusepi32_epi16(srcColors);
-				_mm256_storeu_si256(reinterpret_cast<__m256i*>(pDest), result16);
-
-				src += ChunkSize;
-				pDest += ChunkSize;
-				len -= ChunkSize;
-			}
-		}
-
 		// AVX2
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, WORD> && CompileAvx2)
 		{
