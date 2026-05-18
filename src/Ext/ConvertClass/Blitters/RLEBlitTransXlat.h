@@ -30,53 +30,6 @@ private:
 
 		RLE_PROCESS_PRE_LINES(false, false, pDest, src, len, line, zbuf, abuf);
 
-		// AVX512 BYTE
-		if constexpr (Level == Simd::Level::AVX512 && std::is_same_v<T, BYTE> && CompileAvx512)
-		{
-			constexpr int ChunkSize = 16;
-			alignas(64) unsigned int paletteLut32[256];
-			Avx512_BuildByteLut32(pPaletteData, paletteLut32);
-
-			while (len > 0)
-			{
-				byte srcv = *src++;
-				if (srcv)
-				{
-					byte* pRunSrc = src - 1;
-					int runLen = 1;
-					while (runLen < len && pRunSrc[runLen])
-						++runLen;
-
-					int remaining = runLen;
-					while (remaining >= ChunkSize)
-					{
-						const __m512i srcIndices32 = Avx512_Expand16ToEpi32(pRunSrc);
-						const __m512i srcColors32 = _mm512_i32gather_epi32(srcIndices32, paletteLut32, 4);
-						const __m128i result8 = Avx512_PackU32ToU8(srcColors32);
-						_mm_storeu_si128(reinterpret_cast<__m128i*>(pDest), result8);
-
-						pRunSrc += ChunkSize;
-						pDest += ChunkSize;
-						remaining -= ChunkSize;
-					}
-
-					while (remaining--)
-						*pDest++ = pPaletteData[*pRunSrc++];
-
-					src = pRunSrc;
-					len -= runLen;
-				}
-				else
-				{
-					byte off = *src++;
-					len -= off;
-					pDest += off;
-				}
-			}
-
-			return;
-		}
-
 		// AVX2 BYTE
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, BYTE> && CompileAvx2)
 		{
@@ -120,52 +73,6 @@ private:
 						++pRunSrc;
 						++pDest;
 					}
-
-					src = pRunSrc;
-					len -= runLen;
-				}
-				else
-				{
-					byte off = *src++;
-					len -= off;
-					pDest += off;
-				}
-			}
-
-			return;
-		}
-
-		// AVX512
-		if constexpr (Level == Simd::Level::AVX512 && std::is_same_v<T, WORD> && CompileAvx512)
-		{
-			constexpr int ChunkSize = 16;
-
-			while (len > 0)
-			{
-				byte srcv = *src++;
-				if (srcv)
-				{
-					byte* pRunSrc = src - 1;
-					int runLen = 1;
-					while (runLen < len && pRunSrc[runLen])
-						++runLen;
-
-					int remaining = runLen;
-					while (remaining >= ChunkSize)
-					{
-						const __m128i srcBytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pRunSrc));
-						const __m512i srcIndices = _mm512_cvtepu8_epi32(srcBytes);
-						const __m512i srcColors = _mm512_i32gather_epi32(srcIndices, pPaletteData, 2);
-						const __m256i result16 = _mm512_cvtepi32_epi16(srcColors);
-						_mm256_storeu_si256(reinterpret_cast<__m256i*>(pDest), result16);
-
-						pRunSrc += ChunkSize;
-						pDest += ChunkSize;
-						remaining -= ChunkSize;
-					}
-
-					while (remaining--)
-						*pDest++ = pPaletteData[*pRunSrc++];
 
 					src = pRunSrc;
 					len -= runLen;

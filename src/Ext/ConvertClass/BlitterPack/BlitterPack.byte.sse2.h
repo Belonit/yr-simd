@@ -6,6 +6,8 @@
 class NOVTABLE BlitterPack8SSE2 final
 {
 public:
+	// BYTE SSE2 paths are intentionally scalar: current SSE2 variants still
+	// fall back to per-lane work after mask checks and benchmark slower.
 	BlitPlainXlat<BYTE, Simd::Level::Scalar> BlitterPlainXlat;
 	BlitTransXlat<BYTE, Simd::Level::Scalar> BlitterTransXlat;
 	BlitTransRemapDest<BYTE, Simd::Level::Scalar> BlitterTransRemapDest;
@@ -20,18 +22,18 @@ public:
 	RLEBlitTransRemapXlat<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlat75;
 	RLEBlitTransRemapXlat<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlat50;
 	RLEBlitTransRemapXlat<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlat25;
-	RLEBlitTransXlatZRead<BYTE, Simd::Level::SSE2> RleBlitterTransXlatZRead;
-	RLEBlitTransRemapDestZRead<BYTE, Simd::Level::SSE2> RleBlitterTransRemapDestZRead;
-	RLEBlitTransZRemapXlatZRead<BYTE, Simd::Level::SSE2> RleBlitterTransZRemapXlatZRead;
-	RLEBlitTransRemapXlatZRead<BYTE, Simd::Level::SSE2> RleBlitterTransRemapXlatZRead75;
-	RLEBlitTransRemapXlatZRead<BYTE, Simd::Level::SSE2> RleBlitterTransRemapXlatZRead50;
-	RLEBlitTransRemapXlatZRead<BYTE, Simd::Level::SSE2> RleBlitterTransRemapXlatZRead25;
-	RLEBlitTransXlatZReadWrite<BYTE, Simd::Level::SSE2> RleBlitterTransXlatZReadWrite;
-	RLEBlitTransRemapDestZReadWrite<BYTE, Simd::Level::SSE2> RleBlitterTransRemapDestZReadWrite;
-	RLEBlitTransZRemapXlatZReadWrite<BYTE, Simd::Level::SSE2> RleBlitterTransZRemapXlatZReadWrite;
-	RLEBlitTransRemapXlatZReadWrite<BYTE, Simd::Level::SSE2> RleBlitterTransRemapXlatZReadWrite75;
-	RLEBlitTransRemapXlatZReadWrite<BYTE, Simd::Level::SSE2> RleBlitterTransRemapXlatZReadWrite50;
-	RLEBlitTransRemapXlatZReadWrite<BYTE, Simd::Level::SSE2> RleBlitterTransRemapXlatZReadWrite25;
+	RLEBlitTransXlatZRead<BYTE, Simd::Level::Scalar> RleBlitterTransXlatZRead;
+	RLEBlitTransRemapDestZRead<BYTE, Simd::Level::Scalar> RleBlitterTransRemapDestZRead;
+	RLEBlitTransZRemapXlatZRead<BYTE, Simd::Level::Scalar> RleBlitterTransZRemapXlatZRead;
+	RLEBlitTransRemapXlatZRead<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlatZRead75;
+	RLEBlitTransRemapXlatZRead<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlatZRead50;
+	RLEBlitTransRemapXlatZRead<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlatZRead25;
+	RLEBlitTransXlatZReadWrite<BYTE, Simd::Level::Scalar> RleBlitterTransXlatZReadWrite;
+	RLEBlitTransRemapDestZReadWrite<BYTE, Simd::Level::Scalar> RleBlitterTransRemapDestZReadWrite;
+	RLEBlitTransZRemapXlatZReadWrite<BYTE, Simd::Level::Scalar> RleBlitterTransZRemapXlatZReadWrite;
+	RLEBlitTransRemapXlatZReadWrite<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlatZReadWrite75;
+	RLEBlitTransRemapXlatZReadWrite<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlatZReadWrite50;
+	RLEBlitTransRemapXlatZReadWrite<BYTE, Simd::Level::Scalar> RleBlitterTransRemapXlatZReadWrite25;
 
 public:
 	inline BlitterPack8SSE2(BYTE* paletteData, BYTE* remapData, BYTE** currentZRemap)

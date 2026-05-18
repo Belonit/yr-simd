@@ -33,56 +33,6 @@ private:
 		RLE_PROCESS_PRE_LINES(false, false, pDest, src, len, line, zbuf, abuf);
 
 		// AVX512 BYTE
-		if constexpr (Level == Simd::Level::AVX512 && std::is_same_v<T, BYTE> && CompileAvx512)
-		{
-			constexpr int ChunkSize = 16;
-			alignas(64) unsigned int paletteLut32[256];
-			Avx512_BuildByteLut32(pPaletteData, paletteLut32);
-			alignas(64) unsigned int remappedIndices[ChunkSize];
-
-			while (len > 0)
-			{
-				byte srcv = *src++;
-				if (srcv)
-				{
-					byte* pRunSrc = src - 1;
-					int runLen = 1;
-					while (runLen < len && pRunSrc[runLen])
-						++runLen;
-
-					int remaining = runLen;
-					while (remaining >= ChunkSize)
-					{
-						byte* pCurrentRemap = *pRemapData;
-						for (int i = 0; i < ChunkSize; ++i)
-							remappedIndices[i] = pCurrentRemap[pRunSrc[i]];
-
-						const __m512i remapIndex32 = _mm512_load_si512(reinterpret_cast<const __m512i*>(remappedIndices));
-						const __m512i srcColors32 = _mm512_i32gather_epi32(remapIndex32, paletteLut32, 4);
-						const __m128i result8 = Avx512_PackU32ToU8(srcColors32);
-						_mm_storeu_si128(reinterpret_cast<__m128i*>(pDest), result8);
-
-						pRunSrc += ChunkSize;
-						pDest += ChunkSize;
-						remaining -= ChunkSize;
-					}
-
-					while (remaining--)
-						*pDest++ = pPaletteData[(*pRemapData)[*pRunSrc++]];
-
-					src = pRunSrc;
-					len -= runLen;
-				}
-				else
-				{
-					byte off = *src++;
-					len -= off;
-					pDest += off;
-				}
-			}
-
-			return;
-		}
 		// AVX2 BYTE
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, BYTE> && CompileAvx2)
 		{
@@ -131,61 +81,6 @@ private:
 
 						++pRunSrc;
 						++pDest;
-					}
-
-					src = pRunSrc;
-					len -= runLen;
-				}
-				else
-				{
-					byte off = *src++;
-					len -= off;
-					pDest += off;
-				}
-			}
-
-			return;
-		}
-
-		// SSE2
-		if constexpr (Level == Simd::Level::SSE2 && std::is_same_v<T, WORD>)
-		{
-			constexpr int ChunkSize = 8;
-			alignas(16) WORD remappedIndices[ChunkSize];
-
-			while (len > 0)
-			{
-				byte srcv = *src++;
-				if (srcv)
-				{
-					byte* pRunSrc = src - 1;
-					int runLen = 1;
-					while (runLen < len && pRunSrc[runLen])
-					{
-						++runLen;
-					}
-
-					int remaining = runLen;
-					while (remaining >= ChunkSize)
-					{
-						byte* pCurrentRemap = *pRemapData;
-						for (int i = 0; i < ChunkSize; ++i)
-						{
-							remappedIndices[i] = static_cast<WORD>(pCurrentRemap[pRunSrc[i]]);
-						}
-
-						const __m128i remapIndex16 = _mm_load_si128(reinterpret_cast<const __m128i*>(remappedIndices));
-						const __m128i srcColors16 = Sse2_GatherPaletteWord(remapIndex16, pPaletteData);
-						_mm_storeu_si128(reinterpret_cast<__m128i*>(pDest), srcColors16);
-
-						pRunSrc += ChunkSize;
-						pDest += ChunkSize;
-						remaining -= ChunkSize;
-					}
-
-					while (remaining--)
-					{
-						*pDest++ = pPaletteData[(*pRemapData)[*pRunSrc++]];
 					}
 
 					src = pRunSrc;

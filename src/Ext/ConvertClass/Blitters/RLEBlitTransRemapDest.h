@@ -30,55 +30,6 @@ private:
 
 		RLE_PROCESS_PRE_LINES(false, false, pDest, src, len, line, zbuf, abuf);
 
-		if constexpr (Level == Simd::Level::AVX512 && CompileAvx512)
-		{
-			constexpr int ChunkSize = 16;
-			alignas(64) unsigned int remapLut32[256];
-			Avx512_BuildByteLut32(pRemapDest, remapLut32);
-
-			while (len > 0)
-			{
-				byte srcv = *src++;
-				if (srcv)
-				{
-					byte* pRunSrc = src - 1;
-					int runLen = 1;
-					while (runLen < len && pRunSrc[runLen])
-						++runLen;
-
-					int remaining = runLen;
-					while (remaining >= ChunkSize)
-					{
-						const __m512i index32 = Avx512_Expand16ToEpi32(reinterpret_cast<const byte*>(pDest));
-						const __m512i remapped32 = _mm512_i32gather_epi32(index32, remapLut32, 4);
-						const __m128i result8 = Avx512_PackU32ToU8(remapped32);
-						_mm_storeu_si128(reinterpret_cast<__m128i*>(pDest), result8);
-
-						pRunSrc += ChunkSize;
-						pDest += ChunkSize;
-						remaining -= ChunkSize;
-					}
-
-					while (remaining--)
-					{
-						*pDest = pRemapDest[*pDest];
-						++pRunSrc;
-						++pDest;
-					}
-
-					src = pRunSrc;
-					len -= runLen;
-				}
-				else
-				{
-					byte off = *src++;
-					len -= off;
-					pDest += off;
-				}
-			}
-
-			return;
-		}
 		// AVX2 BYTE
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
