@@ -89,15 +89,7 @@ private:
 						int zval = zbase - static_cast<int>(static_cast<signed char>(*pRunZAdjust++));
 						if (zval < *zbuf)
 						{
-							if constexpr (false)
-								*pDest = pPaletteData[*pRunSrc];
-							else if constexpr (false)
-								*pDest = pRemapDest[*pDest];
-							else if constexpr (true)
-								*pDest = pPaletteData[pRemapData[*pRunSrc]];
-							else
-								*pDest = pPaletteData[(*pRemapData)[*pRunSrc]];
-
+							*pDest = pPaletteData[pRemapData[*pRunSrc]];
 							*zbuf = static_cast<WORD>(zval);
 						}
 
@@ -125,8 +117,7 @@ private:
 			return;
 		}
 
-
-
+		// Scalar
 		auto handler = [pRemapData, pPaletteData](BYTE& pDest, byte srcv, int zbase, WORD& zbufv, byte zadjustv)
 		{
 			int zval = zbase - static_cast<int>(static_cast<signed char>(zadjustv));

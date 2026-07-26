@@ -32,7 +32,6 @@ private:
 
 		RLE_PROCESS_PRE_LINES(false, false, pDest, src, len, line, zbuf, abuf);
 
-		// AVX512 BYTE
 		// AVX2 BYTE
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, BYTE> && CompileAvx2)
 		{
@@ -70,15 +69,7 @@ private:
 
 					while (remaining--)
 					{
-						if constexpr (false)
-							*pDest = pPaletteData[*pRunSrc];
-						else if constexpr (false)
-							*pDest = pRemapDest[*pDest];
-						else if constexpr (false)
-							*pDest = pPaletteData[pRemapData[*pRunSrc]];
-						else
-							*pDest = pPaletteData[(*pRemapData)[*pRunSrc]];
-
+						*pDest = pPaletteData[(*pRemapData)[*pRunSrc]];
 						++pRunSrc;
 						++pDest;
 					}

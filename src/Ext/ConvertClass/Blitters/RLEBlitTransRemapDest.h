@@ -61,15 +61,7 @@ private:
 
 					while (remaining--)
 					{
-						if constexpr (false)
-							*pDest = pPaletteData[*pRunSrc];
-						else if constexpr (true)
-							*pDest = pRemapDest[*pDest];
-						else if constexpr (false)
-							*pDest = pPaletteData[pRemapData[*pRunSrc]];
-						else
-							*pDest = pPaletteData[(*pRemapData)[*pRunSrc]];
-
+						*pDest = pRemapDest[*pDest];
 						++pRunSrc;
 						++pDest;
 					}
@@ -88,8 +80,7 @@ private:
 			return;
 		}
 
-
-
+		// Scalar
 		auto handler = [pRemapDest](BYTE& pDest, byte srcv)
 		{
 			pDest = pRemapDest[pDest];

@@ -41,7 +41,7 @@ private:
 		T* pDest = reinterpret_cast<T*>(dst);
 		T* pPaletteData = this->PaletteData;
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, WORD> && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;

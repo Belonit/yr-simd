@@ -41,7 +41,7 @@ private:
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
 		WORD mask = this->Mask;
 
-		// AVX512
+		// AVX512 WORD
 		if constexpr (Level == Simd::Level::AVX512 && CompileAvx512)
 		{
 			constexpr int ChunkSize = 32;
@@ -64,7 +64,7 @@ private:
 			}
 		}
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
@@ -93,7 +93,7 @@ private:
 			}
 		}
 
-		// SSE2
+		// SSE2 WORD
 		if constexpr (Level == Simd::Level::SSE2)
 		{
 			constexpr int ChunkSize = 8;

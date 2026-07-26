@@ -32,7 +32,7 @@ private:
 
 		RLE_PROCESS_PRE_LINES(true, false, pDest, src, len, line, zbuf, abuf);
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			if (warp >= 0)

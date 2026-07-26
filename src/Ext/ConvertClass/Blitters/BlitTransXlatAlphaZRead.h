@@ -44,7 +44,7 @@ private:
 		WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
 		WORD* pPaletteData = this->PaletteData;
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;

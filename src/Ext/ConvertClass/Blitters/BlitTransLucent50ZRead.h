@@ -43,7 +43,7 @@ private:
 		WORD* pPaletteData = this->PaletteData;
 		WORD mask = this->Mask;
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;

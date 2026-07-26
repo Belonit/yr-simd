@@ -30,7 +30,7 @@ private:
 
 		RLE_PROCESS_PRE_LINES(true, false, pDest, src, len, line, zbuf, abuf);
 
-		// AVX512
+		// AVX512 WORD
 		if constexpr (Level == Simd::Level::AVX512 && CompileAvx512)
 		{
 			constexpr int ChunkSize = 16;
@@ -116,7 +116,7 @@ private:
 			return;
 		}
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
@@ -213,7 +213,7 @@ private:
 			return;
 		}
 
-		// SSE2
+		// SSE2 WORD
 		if constexpr (Level == Simd::Level::SSE2)
 		{
 			constexpr int ChunkSize = 8;

@@ -103,7 +103,7 @@ public:
 	RLEBlitTransLucent25AlphaZReadFix<WORD, Simd::Level::Scalar> RleBlitterTransLucent25AlphaZReadFix;
 
 public:
-	inline BlitterPack16SSE2::BlitterPack16SSE2(WORD* paletteData, WORD* fullColorData, BYTE** currentZRemap, WORD halfTranslucencyMask, WORD quatTranslucencyMask, int shadeCount)
+	inline BlitterPack16SSE2(WORD* paletteData, WORD* fullColorData, BYTE** currentZRemap, WORD halfTranslucencyMask, WORD quatTranslucencyMask, int shadeCount)
 		: BlitterPlainXlat(paletteData)
 		, BlitterTransXlat(paletteData)
 		, BlitterTransDarken(halfTranslucencyMask)

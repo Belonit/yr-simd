@@ -44,7 +44,7 @@ private:
 		WORD mask = this->Mask;
 		WORD zWriteValue = static_cast<WORD>(zval);
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;

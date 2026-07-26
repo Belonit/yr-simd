@@ -61,15 +61,7 @@ private:
 
 					while (remaining--)
 					{
-						if constexpr (true)
-							*pDest = pPaletteData[*pRunSrc];
-						else if constexpr (false)
-							*pDest = pRemapDest[*pDest];
-						else if constexpr (false)
-							*pDest = pPaletteData[pRemapData[*pRunSrc]];
-						else
-							*pDest = pPaletteData[(*pRemapData)[*pRunSrc]];
-
+						*pDest = pPaletteData[*pRunSrc];
 						++pRunSrc;
 						++pDest;
 					}
@@ -88,7 +80,7 @@ private:
 			return;
 		}
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, WORD> && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;

@@ -41,7 +41,7 @@ private:
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
 		WORD* pPaletteData = this->PaletteData;
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;

@@ -9,9 +9,8 @@
 #include <immintrin.h>
 #include <type_traits>
 
-// All of those blitters can be found at 48EBF0!
-
 // All Westwood fucking jesus blitters goes here!
+// All of those blitters can be found at 48EBF0!
 class Blitter
 {
 public:
@@ -145,7 +144,7 @@ inline constexpr bool CompileAvx2 = false;
 #define Avx512_Expand16ToEpi32(pSrc)                                              \
 	_mm512_cvtepu8_epi32(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pSrc)))
 
-#define Avx512_PackU32ToU8(value32) \
+#define Avx512_PackU32ToU8(value32)           \
 	_mm512_cvtusepi32_epi8((value32))
 
 #define Avx512_BuildByteLut32(pTable, pLut32) \
@@ -185,12 +184,12 @@ inline constexpr bool CompileAvx2 = false;
 #define Avx2_Load8WordAsEpi32(pSrc) \
 	_mm256_cvtepu16_epi32(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pSrc)))
 
-#define Avx2_PackU32ToU16(value32)                                    \
-	([](const __m256i value32Local) -> __m128i                        \
-	{                                                                 \
-		const __m128i lo = _mm256_castsi256_si128(value32Local);      \
-		const __m128i hi = _mm256_extracti128_si256(value32Local, 1); \
-		return _mm_packus_epi32(lo, hi);                              \
+#define Avx2_PackU32ToU16(value32)                                        \
+	([](const __m256i value32Local) -> __m128i                            \
+	{                                                                     \
+		const __m128i lo = _mm256_castsi256_si128(value32Local);          \
+		const __m128i hi = _mm256_extracti128_si256(value32Local, 1);     \
+		return _mm_packus_epi32(lo, hi);                                  \
 	}(value32))
 
 #define Avx2_PackMask32ToI16(value32Mask)                                 \
@@ -230,31 +229,31 @@ inline constexpr bool CompileAvx2 = false;
 		return value32;                                                                                        \
 	}((index32), (pTable)))
 
-#define Avx2_GatherPaletteWord(srcIndex32, pPaletteData) \
+#define Avx2_GatherPaletteWord(srcIndex32, pPaletteData)                      \
 	Avx2_GatherWordTable((srcIndex32), (pPaletteData), 0xFF)
 
-#define Avx2_PackU32ToU8(value32)                                \
-	([](const __m256i value32Local) -> __m128i                   \
-	{                                                            \
-		const __m128i value16 = Avx2_PackU32ToU16(value32Local); \
-		return _mm_packus_epi16(value16, _mm_setzero_si128());   \
+#define Avx2_PackU32ToU8(value32)                                             \
+	([](const __m256i value32Local) -> __m128i                                \
+	{                                                                         \
+		const __m128i value16 = Avx2_PackU32ToU16(value32Local);              \
+		return _mm_packus_epi16(value16, _mm_setzero_si128());                \
 	}(value32))
 
-#define Avx2_BuildByteLut32(pTable, pLut32) \
-{                                           \
-	for (int i = 0; i < 256; ++i)           \
-		(pLut32)[i] = (pTable)[i];          \
+#define Avx2_BuildByteLut32(pTable, pLut32)                                   \
+{                                                                             \
+	for (int i = 0; i < 256; ++i)                                             \
+		(pLut32)[i] = (pTable)[i];                                            \
 }
 
-#define Avx2_StoreMask8(pDest, writeMask, value8)                      \
-{                                                                      \
-	alignas(16) BYTE valueArray[16];                                   \
-	_mm_store_si128(reinterpret_cast<__m128i*>(valueArray), (value8)); \
-	for (int lane = 0; lane < 8; ++lane)                               \
-	{                                                                  \
-		if (((writeMask) & (1 << lane)) != 0)                          \
-			(pDest)[lane] = valueArray[lane];                          \
-	}                                                                  \
+#define Avx2_StoreMask8(pDest, writeMask, value8)                             \
+{                                                                             \
+	alignas(16) BYTE valueArray[16];                                          \
+	_mm_store_si128(reinterpret_cast<__m128i*>(valueArray), (value8));        \
+	for (int lane = 0; lane < 8; ++lane)                                      \
+	{                                                                         \
+		if (((writeMask) & (1 << lane)) != 0)                                 \
+			(pDest)[lane] = valueArray[lane];                                 \
+	}                                                                         \
 }
 
 #define Avx2_StoreMask8AndZ(pDest, pZBuffer, writeMask, value8, zValues32)    \

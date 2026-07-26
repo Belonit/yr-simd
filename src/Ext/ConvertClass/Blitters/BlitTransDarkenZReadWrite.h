@@ -42,7 +42,7 @@ private:
 		WORD mask = this->Mask;
 		WORD zWriteValue = static_cast<WORD>(zval);
 
-		// AVX512
+		// AVX512 WORD
 		if constexpr (Level == Simd::Level::AVX512 && CompileAvx512)
 		{
 			ZBuffer* pZBuffer = ZBuffer::Instance;
@@ -93,7 +93,7 @@ private:
 			}
 		}
 
-		// AVX2
+		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
@@ -151,7 +151,7 @@ private:
 			}
 		}
 
-		// SSE2
+		// SSE2 WORD
 		if constexpr (Level == Simd::Level::SSE2)
 		{
 			constexpr int ChunkSize = 8;
