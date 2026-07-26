@@ -13,12 +13,12 @@ public:
 
 	virtual ~RLEBlitTransZRemapXlatZRead() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust) override final
 	{
 		Blit_Impl(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust);
 	}
@@ -27,8 +27,8 @@ private:
 	__forceinline void Blit_Impl(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust)
 	{
 		T* pDest = reinterpret_cast<T*>(dst);
-		byte** pRemapData = this->RemapData;
-		T* pPaletteData = this->PaletteData;
+		byte* const* pRemapData = this->RemapData;
+		const T* pPaletteData = this->PaletteData;
 
 		RLE_PROCESS_PRE_LINES(true, false, pDest, src, len, line, zbuf, abuf);
 
@@ -51,9 +51,12 @@ private:
 				{
 					byte* pRunSrc = src - 1;
 					byte* pRunZAdjust = zadjust;
+					AssertBlitterInvariant(len > 0);
+					AssertBlitterInvariant(*pRunSrc != 0);
 					int runLen = 1;
 					while (runLen < len && pRunSrc[runLen])
 						++runLen;
+					AssertBlitterInvariant(runLen <= len);
 
 					int remaining = runLen;
 					while (remaining >= ChunkSize)
@@ -70,7 +73,7 @@ private:
 
 						if (zMask)
 						{
-							byte* pCurrentRemap = *pRemapData;
+							const byte* pCurrentRemap = *pRemapData;
 							for (int lane = 0; lane < ChunkSize; ++lane)
 								remappedIndices[lane] = pCurrentRemap[pRunSrc[lane]];
 
@@ -132,5 +135,5 @@ private:
 		RLE_PROCESS_PIXEL_DATAS(true, false, pDest, src, len, zbase, zbuf, abuf, zadjust, handler);
 	}
 	byte** RemapData;
-	T* PaletteData;
+	const T* PaletteData;
 };

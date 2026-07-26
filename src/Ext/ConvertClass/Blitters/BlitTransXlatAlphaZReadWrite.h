@@ -5,7 +5,7 @@
 DEFINE_BLITTER(BlitTransXlatAlphaZReadWrite, BlitterPixelWordOnly)
 {
 public:
-	inline explicit BlitTransXlatAlphaZReadWrite(WORD * data, int shadecount) noexcept
+	inline explicit BlitTransXlatAlphaZReadWrite(WORD* data, int shadecount) noexcept
 	{
 		this->PaletteData = data;
 		this->AlphaRemapper = AlphaLightingRemapClass::FindOrAllocate(shadecount);
@@ -13,35 +13,35 @@ public:
 
 	virtual ~BlitTransXlatAlphaZReadWrite() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte * src, int len, int zval, WORD * zbuf, WORD * abuf, int alvl, int warp)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte * src, int len, int zval, WORD * zbuf, WORD * abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move(void* dst, byte * src, int len, int zval, WORD * zbuf, WORD * abuf, int alvl, int warp)
+	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move_Tinted(void* dst, byte * src, int len, int zval, WORD * zbuf, WORD * abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
 private:
-	__forceinline void Blit_Impl(void* dst, byte * src, int len, int zval, WORD * zbuf, WORD * abuf, int alvl, int warp)
+	__forceinline void Blit_Impl(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp)
 	{
 		if (len < 0)
 			return;
 
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
-		WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
-		WORD* pPaletteData = this->PaletteData;
+		const WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
+		const WORD* pPaletteData = this->PaletteData;
 
 		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
@@ -130,6 +130,6 @@ private:
 			ADJUST_POINTER(ABuffer::Instance, abuf);
 		}
 	}
-	WORD* PaletteData;
+	const WORD* PaletteData;
 	AlphaLightingRemapClass* AlphaRemapper;
 };

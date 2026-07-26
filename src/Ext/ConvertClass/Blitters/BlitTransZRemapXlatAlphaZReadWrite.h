@@ -14,22 +14,22 @@ public:
 
 	virtual ~BlitTransZRemapXlatAlphaZReadWrite() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp)
+	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
@@ -41,9 +41,9 @@ private:
 			return;
 
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
-		byte** ppRemapData = this->RemapData;
-		WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
-		WORD* pPaletteData = this->PaletteData;
+		byte* const* ppRemapData = this->RemapData;
+		const WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
+		const WORD* pPaletteData = this->PaletteData;
 
 		// Scalar
 		while (len--)
@@ -64,6 +64,6 @@ private:
 		}
 	}
 	byte** RemapData;
-	WORD* PaletteData;
+	const WORD* PaletteData;
 	AlphaLightingRemapClass* AlphaRemapper;
 };

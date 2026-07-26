@@ -12,22 +12,22 @@ public:
 
 	virtual ~BlitTransXlatZReadWrite() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp)
+	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
@@ -39,7 +39,7 @@ private:
 			return;
 
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
-		WORD* pPaletteData = this->PaletteData;
+		const WORD* pPaletteData = this->PaletteData;
 		WORD zWriteValue = static_cast<WORD>(zval);
 
 		// AVX2 WORD
@@ -116,5 +116,5 @@ private:
 			ADJUST_POINTER(ZBuffer::Instance, zbuf);
 		}
 	}
-	WORD* PaletteData;
+	const WORD* PaletteData;
 };

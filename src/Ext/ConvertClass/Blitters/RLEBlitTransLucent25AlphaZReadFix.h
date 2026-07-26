@@ -13,12 +13,12 @@ public:
 
 	virtual ~RLEBlitTransLucent25AlphaZReadFix() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust) override final
 	{
 		Blit_Impl(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust);
 	}
@@ -29,8 +29,8 @@ private:
 		constexpr unsigned int RGB565BlendMask = 0xF7DEu;
 
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
-		WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
-		WORD* pPaletteData = this->PaletteData;
+		const WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
+		const WORD* pPaletteData = this->PaletteData;
 
 		RLE_PROCESS_PRE_LINES(true, true, pDest, src, len, line, zbuf, abuf);
 

@@ -14,22 +14,22 @@ public:
 
 	virtual ~BlitTransLucent75AlphaZRead() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp)
+	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint)
+	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
@@ -41,8 +41,8 @@ private:
 			return;
 
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
-		WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
-		WORD* pPaletteData = this->PaletteData;
+		const WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
+		const WORD* pPaletteData = this->PaletteData;
 		WORD mask = this->Mask;
 
 		// AVX2 WORD
@@ -131,7 +131,7 @@ private:
 			ADJUST_POINTER(ABuffer::Instance, abuf);
 		}
 	}
-	WORD* PaletteData;
+	const WORD* PaletteData;
 	WORD Mask;
 	AlphaLightingRemapClass* AlphaRemapper;
 };

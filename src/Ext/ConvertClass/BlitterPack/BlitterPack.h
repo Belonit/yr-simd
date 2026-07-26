@@ -3,6 +3,7 @@
 #include "Ext/ConvertClass/Blitters/index.h"
 #include <ConvertClass.h>
 #include <Main.h>
+#include <type_traits>
 
 enum BlitterIndex8
 {
@@ -134,6 +135,11 @@ enum RleBlitterIndex16
 	RleBlitterIndex16_TransLucent50AlphaZReadWrite,
 	RleBlitterIndex16_TransLucent25AlphaZReadWrite
 };
+
+static_assert(BlitterIndex8_TransRemapXlat25 < static_cast<int>(std::extent_v<decltype(ConvertClass::Blitters)>));
+static_assert(RleBlitterIndex8_TransRemapXlatZReadWrite25 < static_cast<int>(std::extent_v<decltype(ConvertClass::RLEBlitters)>));
+static_assert(BlitterIndex16_TransLucent25AlphaZReadWrite + 1 == static_cast<int>(std::extent_v<decltype(ConvertClass::Blitters)>));
+static_assert(RleBlitterIndex16_TransLucent25AlphaZReadWrite + 1 == static_cast<int>(std::extent_v<decltype(ConvertClass::RLEBlitters)>));
 
 template <typename TPack>
 __forceinline void MapBlitterPack8(TPack* pPack, ConvertClass* pConvertClass)

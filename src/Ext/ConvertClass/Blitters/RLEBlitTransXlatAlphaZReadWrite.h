@@ -13,12 +13,12 @@ public:
 
 	virtual ~RLEBlitTransXlatAlphaZReadWrite() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust) override final
 	{
 		Blit_Impl<false>(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust, 0);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint) override final
 	{
 		Blit_Impl<true>(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust, tint);
 	}
@@ -28,8 +28,8 @@ private:
 	__forceinline void Blit_Impl(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint)
 	{
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
-		WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
-		WORD* pPaletteData = this->PaletteData;
+		const WORD* pAData = LOOKUP_ALPHA_REMAPPER(alvl, this->AlphaRemapper);
+		const WORD* pPaletteData = this->PaletteData;
 
 		RLE_PROCESS_PRE_LINES(true, true, pDest, src, len, line, zbuf, abuf);
 
@@ -53,9 +53,12 @@ private:
 				{
 					byte* pRunSrc = src - 1;
 					byte* pRunZAdjust = zadjust;
+					AssertBlitterInvariant(len > 0);
+					AssertBlitterInvariant(*pRunSrc != 0);
 					int runLen = 1;
 					while (runLen < len && pRunSrc[runLen])
 						++runLen;
+					AssertBlitterInvariant(runLen <= len);
 
 					int remaining = runLen;
 					while (remaining >= ChunkSize)
@@ -168,6 +171,6 @@ private:
 
 		RLE_PROCESS_PIXEL_DATAS(true, true, pDest, src, len, zbase, zbuf, abuf, zadjust, handler);
 	}
-	WORD* PaletteData;
+	const WORD* PaletteData;
 	AlphaLightingRemapClass* AlphaRemapper;
 };

@@ -12,12 +12,12 @@ public:
 
 	virtual ~RLEBlitTransDarken() override final = default;
 
-	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust)
+	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust) override final
 	{
 		Blit_Impl(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust);
 	}
 
-	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint)
+	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint) override final
 	{
 		Blit_Impl(dst, src, len, line, zbase, zbuf, abuf, alvl, warp, zadjust);
 	}
@@ -42,9 +42,12 @@ private:
 				if (srcv)
 				{
 					byte* pRunSrc = src - 1;
+					AssertBlitterInvariant(len > 0);
+					AssertBlitterInvariant(*pRunSrc != 0);
 					int runLen = 1;
 					while (runLen < len && pRunSrc[runLen])
 						++runLen;
+					AssertBlitterInvariant(runLen <= len);
 
 					int remaining = runLen;
 					while (remaining >= ChunkSize)
@@ -92,11 +95,12 @@ private:
 				if (srcv)
 				{
 					byte* pRunSrc = src - 1;
+					AssertBlitterInvariant(len > 0);
+					AssertBlitterInvariant(*pRunSrc != 0);
 					int runLen = 1;
 					while (runLen < len && pRunSrc[runLen])
-					{
 						++runLen;
-					}
+					AssertBlitterInvariant(runLen <= len);
 
 					int remaining = runLen;
 					while (remaining >= ChunkSize)
@@ -144,9 +148,12 @@ private:
 				if (srcv)
 				{
 					byte* pRunSrc = src - 1;
+					AssertBlitterInvariant(len > 0);
+					AssertBlitterInvariant(*pRunSrc != 0);
 					int runLen = 1;
 					while (runLen < len && pRunSrc[runLen])
 						++runLen;
+					AssertBlitterInvariant(runLen <= len);
 
 					int remaining = runLen;
 					while (remaining >= ChunkSize)

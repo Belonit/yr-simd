@@ -5,6 +5,8 @@
 #include <Drawing.h>
 #include <AlphaLightingRemapClass.h>
 #include <Utilities/Simd.h>
+#include <algorithm>
+#include <cassert>
 #include <concepts>
 #include <immintrin.h>
 #include <type_traits>
@@ -29,6 +31,15 @@ public:
 	virtual void Blit_Copy(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust) = 0;
 	virtual void Blit_Copy_Tinted(void* dst, byte* src, int len, int line, int zbase, WORD* zbuf, WORD* abuf, int alvl, int warp, byte* zadjust, WORD tint) = 0;
 };
+
+__forceinline void AssertBlitterInvariant(bool condition)
+{
+#if defined(DEBUG)
+	assert(condition);
+#else
+	(void)condition;
+#endif
+}
 
 #define ADJUST_POINTER(buffer, ptr)                            \
 {                                                              \
@@ -224,8 +235,15 @@ inline constexpr bool CompileAvx2 = false;
 	{                                                                                                          \
 		const __m256i maxIndex32 = _mm256_set1_epi32(0xFF);                                                    \
 		const __m256i clampedIndex32 = _mm256_min_epu32(index32Local, maxIndex32);                             \
-		__m256i value32 = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pTableLocal), clampedIndex32, 2);\
+		const __m256i maxIndexMask32 = _mm256_cmpeq_epi32(clampedIndex32, maxIndex32);                         \
+		const __m256i gatherIndex32 = _mm256_andnot_si256(maxIndexMask32, clampedIndex32);                     \
+		__m256i value32 = _mm256_i32gather_epi32(reinterpret_cast<const int*>(pTableLocal), gatherIndex32, 2); \
 		value32 = _mm256_and_si256(value32, _mm256_set1_epi32(0xFFFF));                                        \
+		if (_mm256_movemask_epi8(maxIndexMask32))                                                              \
+		{                                                                                                      \
+			const __m256i maxValue32 = _mm256_set1_epi32(static_cast<int>(pTableLocal[0xFF]));                 \
+			value32 = _mm256_blendv_epi8(value32, maxValue32, maxIndexMask32);                                 \
+		}                                                                                                      \
 		return value32;                                                                                        \
 	}((index32), (pTable)))
 
