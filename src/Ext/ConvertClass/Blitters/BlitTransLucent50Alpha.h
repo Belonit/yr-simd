@@ -49,17 +49,13 @@ private:
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			ABuffer* pABuffer = ABuffer::Instance;
-			const uintptr_t aTailAddress = reinterpret_cast<uintptr_t>(pABuffer->BufferTail);
 			const __m256i zero32 = _mm256_setzero_si256();
 			const __m256i blendMask32 = _mm256_set1_epi32(static_cast<int>(mask));
 
 			while (len >= ChunkSize)
 			{
-				const uintptr_t aAddress = reinterpret_cast<uintptr_t>(abuf);
-				if (aAddress + ChunkBytes > aTailAddress)
-					break;
+				PREPARE_RING_BUFFER_CHUNK(pABuffer, abuf, ChunkSize);
 
 				const __m256i srcIndex32 = Avx2_Expand8ToEpi32(src);
 				const __m256i activeMask32 = _mm256_cmpgt_epi32(srcIndex32, zero32);
@@ -84,6 +80,7 @@ private:
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(pDest), blended16);
 				}
 
+				RESTORE_RING_BUFFER_CHUNK(abuf);
 				src += ChunkSize;
 				pDest += ChunkSize;
 				abuf += ChunkSize;

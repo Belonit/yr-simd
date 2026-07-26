@@ -34,11 +34,9 @@ private:
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, BYTE> && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			alignas(32) unsigned int paletteLut32[256];
 			Avx2_BuildByteLut32(pPaletteData, paletteLut32);
 			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
 			const __m256i zbaseVec = _mm256_set1_epi32(zbase);
 
 			while (len > 0)
@@ -58,9 +56,7 @@ private:
 					int remaining = runLen;
 					while (remaining >= ChunkSize)
 					{
-						const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-						if (zAddress + ChunkBytes > zTailAddress)
-							break;
+						PREPARE_RING_BUFFER_CHUNK(pZBuffer, zbuf, ChunkSize);
 
 						const __m128i zAdjustBytes = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(pRunZAdjust));
 						const __m256i zValues = _mm256_sub_epi32(zbaseVec, _mm256_cvtepi8_epi32(zAdjustBytes));
@@ -76,6 +72,7 @@ private:
 							Avx2_StoreMask8AndZ(pDest, zbuf, zMask, value8, zValues);
 						}
 
+						COMMIT_RING_BUFFER_CHUNK(zbuf);
 						pRunSrc += ChunkSize;
 						pRunZAdjust += ChunkSize;
 						pDest += ChunkSize;
@@ -121,9 +118,7 @@ private:
 		if constexpr (Level == Simd::Level::AVX2 && std::is_same_v<T, WORD> && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
 			const __m256i zbaseVec32 = _mm256_set1_epi32(zbase);
 			const __m256i low16Mask32 = _mm256_set1_epi32(0xFFFF);
 
@@ -144,11 +139,7 @@ private:
 					int remaining = runLen;
 					while (remaining >= ChunkSize)
 					{
-						const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-						if (zAddress + ChunkBytes > zTailAddress)
-						{
-							break;
-						}
+						PREPARE_RING_BUFFER_CHUNK(pZBuffer, zbuf, ChunkSize);
 
 						const __m256i zAdjust32 = _mm256_cvtepi8_epi32(_mm_loadl_epi64(reinterpret_cast<const __m128i*>(pRunZAdjust)));
 						const __m256i zValues32 = _mm256_sub_epi32(zbaseVec32, zAdjust32);
@@ -173,6 +164,7 @@ private:
 							_mm_storeu_si128(reinterpret_cast<__m128i*>(zbuf), zBlended16);
 						}
 
+						COMMIT_RING_BUFFER_CHUNK(zbuf);
 						pRunSrc += ChunkSize;
 						pRunZAdjust += ChunkSize;
 						pDest += ChunkSize;

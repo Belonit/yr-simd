@@ -36,9 +36,7 @@ private:
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
 
 			const __m256i zbaseVec32 = _mm256_set1_epi32(zbase);
 			const __m256i blendMask32 = _mm256_set1_epi32(static_cast<int>(mask));
@@ -61,11 +59,7 @@ private:
 					int remaining = runLen;
 					while (remaining >= ChunkSize)
 					{
-						const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-						if (zAddress + ChunkBytes > zTailAddress)
-						{
-							break;
-						}
+						PREPARE_RING_BUFFER_CHUNK(pZBuffer, zbuf, ChunkSize);
 
 						const __m256i zAdjust32 = _mm256_cvtepi8_epi32(_mm_loadl_epi64(reinterpret_cast<const __m128i*>(pRunZAdjust)));
 						const __m256i zValues32 = _mm256_sub_epi32(zbaseVec32, zAdjust32);
@@ -94,6 +88,7 @@ private:
 							_mm_storeu_si128(reinterpret_cast<__m128i*>(zbuf), zBlended16);
 						}
 
+						COMMIT_RING_BUFFER_CHUNK(zbuf);
 						pRunSrc += ChunkSize;
 						pRunZAdjust += ChunkSize;
 						pDest += ChunkSize;

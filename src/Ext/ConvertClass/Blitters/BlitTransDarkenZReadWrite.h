@@ -46,10 +46,8 @@ private:
 		if constexpr (Level == Simd::Level::AVX512 && CompileAvx512)
 		{
 			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
 
 			constexpr int ChunkSize = 32;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			const __m256i zero = _mm256_setzero_si256();
 			const __m512i darkMask = _mm512_set1_epi16(static_cast<short>(mask));
 			const __m512i zvalVec = _mm512_set1_epi16(static_cast<short>(zval));
@@ -57,11 +55,7 @@ private:
 
 			while (len >= ChunkSize)
 			{
-				const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-				if (zAddress + ChunkBytes > zTailAddress)
-				{
-					break;
-				}
+				PREPARE_RING_BUFFER_CHUNK(pZBuffer, zbuf, ChunkSize);
 
 				const __m512i zbufValues = _mm512_loadu_si512(reinterpret_cast<const void*>(zbuf));
 				const __mmask32 srcMask = _mm256_cmpneq_epu8_mask(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(src)), zero);
@@ -85,6 +79,7 @@ private:
 					_mm512_mask_storeu_epi16(zbuf, activeMask, zWriteVec);
 				}
 
+				COMMIT_RING_BUFFER_CHUNK(zbuf);
 				src += ChunkSize;
 				pDest += ChunkSize;
 				zbuf += ChunkSize;
@@ -97,9 +92,7 @@ private:
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
 
 			const __m256i zero32 = _mm256_setzero_si256();
 			const __m256i darkMask32 = _mm256_set1_epi32(static_cast<int>(mask));
@@ -108,9 +101,7 @@ private:
 
 			while (len >= ChunkSize)
 			{
-				const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-				if (zAddress + ChunkBytes > zTailAddress)
-					break;
+				PREPARE_RING_BUFFER_CHUNK(pZBuffer, zbuf, ChunkSize);
 
 				const __m256i srcIndex32 = Avx2_Expand8ToEpi32(src);
 				const __m256i srcMask32 = _mm256_cmpgt_epi32(srcIndex32, zero32);
@@ -143,6 +134,7 @@ private:
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(zbuf), zWrite16);
 				}
 
+				COMMIT_RING_BUFFER_CHUNK(zbuf);
 				src += ChunkSize;
 				pDest += ChunkSize;
 				zbuf += ChunkSize;
@@ -155,9 +147,7 @@ private:
 		if constexpr (Level == Simd::Level::SSE2)
 		{
 			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			ZBuffer* pZBuffer = ZBuffer::Instance;
-			const uintptr_t zTailAddress = reinterpret_cast<uintptr_t>(pZBuffer->BufferTail);
 
 			const __m128i zero16 = _mm_setzero_si128();
 			const __m128i darkMask16 = _mm_set1_epi16(static_cast<short>(mask));
@@ -168,9 +158,7 @@ private:
 
 			while (len >= ChunkSize)
 			{
-				const uintptr_t zAddress = reinterpret_cast<uintptr_t>(zbuf);
-				if (zAddress + ChunkBytes > zTailAddress)
-					break;
+				PREPARE_RING_BUFFER_CHUNK(pZBuffer, zbuf, ChunkSize);
 
 				const __m128i src16 = Sse2_Expand8ToEpi16(src);
 				const __m128i srcMask16 = _mm_cmpgt_epi16(src16, zero16);
@@ -200,6 +188,7 @@ private:
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(zbuf), zWrite16);
 				}
 
+				COMMIT_RING_BUFFER_CHUNK(zbuf);
 				src += ChunkSize;
 				pDest += ChunkSize;
 				zbuf += ChunkSize;

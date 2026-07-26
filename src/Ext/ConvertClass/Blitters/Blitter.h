@@ -47,6 +47,57 @@ __forceinline void AssertBlitterInvariant(bool condition)
 		reinterpret_cast<char*&>(ptr) -= (buffer)->BufferSize; \
 };
 
+__declspec(noinline) inline void CopyRingBufferChunkToLinear(
+	const WORD* source,
+	const WORD* head,
+	int tailCount,
+	int chunkCount,
+	WORD* destination)
+{
+	for (int i = 0; i < tailCount; ++i)
+		destination[i] = source[i];
+	for (int i = tailCount; i < chunkCount; ++i)
+		destination[i] = head[i - tailCount];
+}
+
+__declspec(noinline) inline void CopyLinearChunkToRingBuffer(
+	const WORD* source,
+	WORD* destination,
+	WORD* head,
+	int tailCount,
+	int chunkCount)
+{
+	for (int i = 0; i < tailCount; ++i)
+		destination[i] = source[i];
+	for (int i = tailCount; i < chunkCount; ++i)
+		head[i - tailCount] = source[i];
+}
+
+#define PREPARE_RING_BUFFER_CHUNK(buffer, ptr, count)                                                   \
+	WORD* ptr##Original = (ptr);                                                                        \
+	WORD* ptr##Head = reinterpret_cast<WORD*>((buffer)->BufferHead);                                    \
+	const int ptr##ChunkCount = (count);                                                                \
+	const int ptr##TailCount = static_cast<int>(reinterpret_cast<WORD*>((buffer)->BufferTail) - (ptr)); \
+	const bool ptr##Wraps = ptr##TailCount < ptr##ChunkCount;                                           \
+	WORD ptr##Chunk[ptr##ChunkCount];                                                                   \
+	AssertBlitterInvariant(ptr##TailCount >= 0);                                                        \
+	AssertBlitterInvariant(ptr##ChunkCount <= (buffer)->BufferSize / static_cast<int>(sizeof(WORD)));   \
+	if (ptr##Wraps)                                                                                     \
+	{                                                                                                   \
+		CopyRingBufferChunkToLinear((ptr), ptr##Head, ptr##TailCount, ptr##ChunkCount, ptr##Chunk);     \
+		(ptr) = ptr##Chunk;                                                                             \
+	}
+
+#define RESTORE_RING_BUFFER_CHUNK(ptr) \
+	(ptr) = ptr##Original
+
+#define COMMIT_RING_BUFFER_CHUNK(ptr)                                                                       \
+{                                                                                                           \
+	if (ptr##Wraps)                                                                                         \
+		CopyLinearChunkToRingBuffer(ptr##Chunk, ptr##Original, ptr##Head, ptr##TailCount, ptr##ChunkCount); \
+	(ptr) = ptr##Original;                                                                                  \
+}
+
 #define RLE_PROCESS_PRE_LINES(UseZBuffer, UseABuffer, dest, src, len, line, zbuf, abuf) \
 {                                                                                       \
 	if ((line) > 0)                                                                     \

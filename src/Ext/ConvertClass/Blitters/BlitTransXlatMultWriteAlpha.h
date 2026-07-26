@@ -42,9 +42,7 @@ private:
 		if constexpr (Level == Simd::Level::AVX512 && CompileAvx512)
 		{
 			constexpr int ChunkSize = 16;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			ABuffer* pABuffer = ABuffer::Instance;
-			const uintptr_t aTailAddress = reinterpret_cast<uintptr_t>(pABuffer->BufferTail);
 
 			const __m128i zero = _mm_setzero_si128();
 			const __m512i alvlVec = _mm512_set1_epi32(alvl);
@@ -53,11 +51,7 @@ private:
 
 			while (len >= ChunkSize)
 			{
-				const uintptr_t aAddress = reinterpret_cast<uintptr_t>(abuf);
-				if (aAddress + ChunkBytes > aTailAddress)
-				{
-					break;
-				}
+				PREPARE_RING_BUFFER_CHUNK(pABuffer, abuf, ChunkSize);
 
 				const __m128i srcBytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src));
 				const __mmask16 activeMask = _mm_cmpneq_epu8_mask(srcBytes, zero);
@@ -71,6 +65,7 @@ private:
 					_mm256_mask_storeu_epi16(abuf, activeMask, alphaValues16);
 				}
 
+				COMMIT_RING_BUFFER_CHUNK(abuf);
 				src += ChunkSize;
 				pDest += ChunkSize;
 				abuf += ChunkSize;
@@ -83,9 +78,7 @@ private:
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
 		{
 			constexpr int ChunkSize = 8;
-			constexpr uintptr_t ChunkBytes = ChunkSize * sizeof(WORD);
 			ABuffer* pABuffer = ABuffer::Instance;
-			const uintptr_t aTailAddress = reinterpret_cast<uintptr_t>(pABuffer->BufferTail);
 
 			const __m256i zero32 = _mm256_setzero_si256();
 			const __m256i alvlVec32 = _mm256_set1_epi32(alvl);
@@ -94,11 +87,7 @@ private:
 
 			while (len >= ChunkSize)
 			{
-				const uintptr_t aAddress = reinterpret_cast<uintptr_t>(abuf);
-				if (aAddress + ChunkBytes > aTailAddress)
-				{
-					break;
-				}
+				PREPARE_RING_BUFFER_CHUNK(pABuffer, abuf, ChunkSize);
 
 				const __m256i srcValues32 = Avx2_Expand8ToEpi32(src);
 				const __m256i activeMask32 = _mm256_cmpgt_epi32(srcValues32, zero32);
@@ -113,6 +102,7 @@ private:
 					_mm_storeu_si128(reinterpret_cast<__m128i*>(abuf), blendedAlpha16);
 				}
 
+				COMMIT_RING_BUFFER_CHUNK(abuf);
 				src += ChunkSize;
 				pDest += ChunkSize;
 				abuf += ChunkSize;
