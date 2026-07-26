@@ -4,6 +4,8 @@
 
 The project targets x86 and dispatches runtime paths between `Scalar`, `SSE2`, `AVX2`, and `AVX512`.
 
+The DLL is loaded through a Syringe-compatible injector. Using [SyringeEx](https://github.com/Phobos-developers/SyringeEx), an extended open-source version of [Syringe](https://github.com/Phobos-developers/Syringe), is recommended, but the original Syringe remains supported.
+
 ## Features
 
 - Runtime SIMD detection with safe fallback.
