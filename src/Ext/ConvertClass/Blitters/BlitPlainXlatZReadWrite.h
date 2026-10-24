@@ -40,7 +40,7 @@ private:
 
 		WORD* pDest = reinterpret_cast<WORD*>(dst);
 		const WORD* pPaletteData = this->PaletteData;
-		WORD zWriteValue = static_cast<WORD>(zval);
+		const WORD zWriteValue = static_cast<BYTE>(zval);
 
 		// AVX2 WORD
 		if constexpr (Level == Simd::Level::AVX2 && CompileAvx2)
