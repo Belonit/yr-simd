@@ -22,14 +22,14 @@ public:
 		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
 	}
 
-	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
+	virtual void Blit_Move(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl) override final
 	{
-		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
+		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, 0);
 	}
 
-	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp, WORD tint) override final
+	virtual void Blit_Move_Tinted(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, WORD tint) override final
 	{
-		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, warp);
+		Blit_Impl(dst, src, len, zval, zbuf, abuf, alvl, 0);
 	}
 
 private:
