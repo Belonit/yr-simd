@@ -12,7 +12,10 @@ public:
 		this->AlphaRemapper = AlphaLightingRemapClass::FindOrAllocate(shadecount);
 	}
 
-	virtual ~BlitTransZRemapXlatAlpha() override final = default;
+	virtual ~BlitTransZRemapXlatAlpha() override final
+	{
+		AlphaLightingRemapClass::Release(this->AlphaRemapper);
+	}
 
 	virtual void Blit_Copy(void* dst, byte* src, int len, int zval, WORD* zbuf, WORD* abuf, int alvl, int warp) override final
 	{
