@@ -71,27 +71,27 @@ private:
 					const __m256i srcColors = Avx2_GatherPaletteWord(srcIndices, pPaletteData);
 					const __m256i destColors = Avx2_Load8WordAsEpi32(pDest);
 					const __m256i alphaRaw = Avx2_Load8WordAsEpi32(abuf);
-					const __m256i resAlpha = _mm256_and_si256(_mm256_sub_epi32(max255, alphaRaw), low16Mask);
+					const __m256i resAlpha = _mm256_sub_epi32(max255, alphaRaw);
 					const __m256i alpha255Mask = _mm256_cmpeq_epi32(alphaRaw, max255);
 					const __m256i alpha = _mm256_blendv_epi8(alphaRaw, twoFiftySix, alpha255Mask);
 
-					const __m256i fgRed = _mm256_sllv_epi32(_mm256_srlv_epi32(srcColors, redShiftLeft), redShiftRight);
-					const __m256i fgGreen = _mm256_sllv_epi32(_mm256_srlv_epi32(srcColors, greenShiftLeft), greenShiftRight);
-					const __m256i fgBlue = _mm256_sllv_epi32(_mm256_srlv_epi32(srcColors, blueShiftLeft), blueShiftRight);
+					const __m256i fgRed = _mm256_and_si256(_mm256_sllv_epi32(_mm256_srlv_epi32(srcColors, redShiftLeft), redShiftRight), low8Mask);
+					const __m256i fgGreen = _mm256_and_si256(_mm256_sllv_epi32(_mm256_srlv_epi32(srcColors, greenShiftLeft), greenShiftRight), low8Mask);
+					const __m256i fgBlue = _mm256_and_si256(_mm256_sllv_epi32(_mm256_srlv_epi32(srcColors, blueShiftLeft), blueShiftRight), low8Mask);
 
-					const __m256i bgRed = _mm256_sllv_epi32(_mm256_srlv_epi32(destColors, redShiftLeft), redShiftRight);
-					const __m256i bgGreen = _mm256_sllv_epi32(_mm256_srlv_epi32(destColors, greenShiftLeft), greenShiftRight);
-					const __m256i bgBlue = _mm256_sllv_epi32(_mm256_srlv_epi32(destColors, blueShiftLeft), blueShiftRight);
+					const __m256i bgRed = _mm256_and_si256(_mm256_sllv_epi32(_mm256_srlv_epi32(destColors, redShiftLeft), redShiftRight), low8Mask);
+					const __m256i bgGreen = _mm256_and_si256(_mm256_sllv_epi32(_mm256_srlv_epi32(destColors, greenShiftLeft), greenShiftRight), low8Mask);
+					const __m256i bgBlue = _mm256_and_si256(_mm256_sllv_epi32(_mm256_srlv_epi32(destColors, blueShiftLeft), blueShiftRight), low8Mask);
 
-					const __m256i redBlend = _mm256_srli_epi32(_mm256_add_epi32(_mm256_mullo_epi32(fgRed, alpha), _mm256_mullo_epi32(bgRed, resAlpha)), 8);
-					const __m256i greenBlend = _mm256_srli_epi32(_mm256_add_epi32(_mm256_mullo_epi32(fgGreen, alpha), _mm256_mullo_epi32(bgGreen, resAlpha)), 8);
-					const __m256i blueBlend = _mm256_srli_epi32(_mm256_add_epi32(_mm256_mullo_epi32(fgBlue, alpha), _mm256_mullo_epi32(bgBlue, resAlpha)), 8);
+					const __m256i redBlend = _mm256_min_epi32(max255, _mm256_srai_epi32(_mm256_add_epi32(_mm256_mullo_epi32(fgRed, alpha), _mm256_mullo_epi32(bgRed, resAlpha)), 8));
+					const __m256i greenBlend = _mm256_min_epi32(max255, _mm256_srai_epi32(_mm256_add_epi32(_mm256_mullo_epi32(fgGreen, alpha), _mm256_mullo_epi32(bgGreen, resAlpha)), 8));
+					const __m256i blueBlend = _mm256_min_epi32(max255, _mm256_srai_epi32(_mm256_add_epi32(_mm256_mullo_epi32(fgBlue, alpha), _mm256_mullo_epi32(bgBlue, resAlpha)), 8));
 
-					const __m256i redPacked = _mm256_sllv_epi32(_mm256_srlv_epi32(_mm256_and_si256(redBlend, low8Mask), redShiftRight), redShiftLeft);
-					const __m256i greenPacked = _mm256_sllv_epi32(_mm256_srlv_epi32(_mm256_and_si256(greenBlend, low8Mask), greenShiftRight), greenShiftLeft);
-					const __m256i bluePacked = _mm256_sllv_epi32(_mm256_srlv_epi32(_mm256_and_si256(blueBlend, low8Mask), blueShiftRight), blueShiftLeft);
+					const __m256i redPacked = _mm256_sllv_epi32(_mm256_srav_epi32(redBlend, redShiftRight), redShiftLeft);
+					const __m256i greenPacked = _mm256_sllv_epi32(_mm256_srav_epi32(greenBlend, greenShiftRight), greenShiftLeft);
+					const __m256i bluePacked = _mm256_sllv_epi32(_mm256_srav_epi32(blueBlend, blueShiftRight), blueShiftLeft);
 					const __m256i resultColors = _mm256_or_si256(_mm256_or_si256(redPacked, greenPacked), bluePacked);
-					const __m128i result16 = Avx2_PackU32ToU16(resultColors);
+					const __m128i result16 = Avx2_PackU32ToU16(_mm256_and_si256(resultColors, low16Mask));
 					const __m128i writeMask16 = Avx2_PackMask32ToI16(activeMask32);
 					const __m128i oldValue16 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pDest));
 					const __m128i blended16 = Avx2_BlendU16(oldValue16, result16, writeMask16);
@@ -113,22 +113,23 @@ private:
 			if (byte idx = *src++)
 			{
 				auto srcv = pPaletteData[idx];
-				WORD alpha = *abuf;
-				WORD resalpha = 255 - alpha;
+				int alpha = *abuf;
+				const int resalpha = 255 - alpha;
 				if (alpha == 255)
 					alpha = 256;
 
 				RGBClass fg { srcv, true };
 				RGBClass bg { *pDest, true };
 
-				RGBClass clr
-				{
-					(fg.Red * alpha + bg.Red * resalpha) >> 8,
-					(fg.Green * alpha + bg.Green * resalpha) >> 8,
-					(fg.Blue * alpha + bg.Blue * resalpha) >> 8
-				};
+				const int red = std::min(255, (fg.Red * alpha + bg.Red * resalpha) >> 8);
+				const int green = std::min(255, (fg.Green * alpha + bg.Green * resalpha) >> 8);
+				const int blue = std::min(255, (fg.Blue * alpha + bg.Blue * resalpha) >> 8);
 
-				*pDest = static_cast<WORD>(clr.ToInt());
+				// Vanilla keeps negative channels signed until the final WORD store.
+				*pDest = static_cast<WORD>(
+					(static_cast<unsigned int>(red >> RGBClass::RedShiftRight) << RGBClass::RedShiftLeft) |
+					(static_cast<unsigned int>(green >> RGBClass::GreenShiftRight) << RGBClass::GreenShiftLeft) |
+					(static_cast<unsigned int>(blue >> RGBClass::BlueShiftRight) << RGBClass::BlueShiftLeft));
 			}
 			++abuf;
 			++pDest;
